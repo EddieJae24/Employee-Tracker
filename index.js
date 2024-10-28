@@ -11,7 +11,55 @@ async function viewDepartments() {
         console.table(rows);
         startApp();
     };
+viewRoles();
+async function viewRoles() {
+    const { rows } = await db.query('SELECT * FROM role');
+        console.table(rows);
+        startApp();
+    }
+
+viewEmployees();
+async function viewEmployees() {
+    const { rows } = await db.query('SELECT * FROM employee');
+        console.table(rows);
+        startApp();
+    }
+
+
+
+function addDepartment() {
+        inquirer.prompt({
+          name: 'name',
+          message: 'Enter the department name:',
+        }).then(async ({ name }) => {
+          await db.query('INSERT INTO department (name) VALUES ($1)', [name]);
+          console.log(`Added department: ${name}`);
+          startApp();
+        });
+      }
       
+addRole();
+function addRole() {
+        inquirer.prompt([
+          {
+            name: 'title',
+            message: 'Enter the role title:',
+          },
+          {
+            name: 'salary',
+            message: 'Enter the role salary:',
+          },
+          {
+            name: 'department_id',
+            message: 'Enter the department ID:',
+          },
+        ]).then(async ({ title, salary, department_id }) => {
+          await db.query('INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)', [title, salary, department_id]);
+          console.log(`Added role: ${title}`);
+          startApp();
+        });
+      }
+            
 
 
 function startApp() {
