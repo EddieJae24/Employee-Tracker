@@ -3,22 +3,40 @@
  3. Updating an employee's role. */
 
 
+import seedDatabase from './db.js';
 import inquirer from 'inquirer';
-import db from './db';
+import pkg from 'pg';
+const { db } = pkg;
 
+// Rest of the code...
+// Client.connect();
+
+// viewDepartments();
 async function viewDepartments() {
-    const { rows } = await db.query('SELECT * FROM department');
+    const { rows } = await seedDatabase('SELECT * FROM department');
         console.table(rows);
         startApp();
-    };
-viewRoles();
+    }
+
+// async function viewDepartments() {
+//   try {
+//     const result = await seedDatabase.query("SELECT * FROM department");
+//     console.table(result.rows);
+//   } catch (error) {
+//     console.error("Error viewing departments:", error);
+//   }
+//   startApp();
+// }
+
+  
+// viewRoles();
 async function viewRoles() {
     const { rows } = await db.query('SELECT * FROM role');
         console.table(rows);
         startApp();
     }
 
-viewEmployees();
+// viewEmployees();
 async function viewEmployees() {
     const { rows } = await db.query('SELECT * FROM employee');
         console.table(rows);
@@ -36,9 +54,9 @@ function addDepartment() {
           console.log(`Added department: ${name}`);
           startApp();
         });
-      }
+      };
       
-addRole();
+// addRole();
 function addRole() {
         inquirer.prompt([
           {
@@ -58,8 +76,33 @@ function addRole() {
           console.log(`Added role: ${title}`);
           startApp();
         });
-      }
-            
+      };
+
+// addEmployee();
+function addEmployee() {
+        inquirer.prompt([
+          {
+            name: 'first_name',
+            message: 'Enter the employee first name:',
+          },
+          {
+            name: 'last_name',
+            message: 'Enter the employee last name:',
+          },
+          {
+            name: 'role_id',
+            message: 'Enter the role ID:',
+          },
+          {
+            name: 'manager_id',
+            message: 'Enter the manager ID:',
+          },
+        ]).then(async ({ first_name, last_name, role_id, manager_id }) => {
+          await db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)', [first_name, last_name, role_id, manager_id]);
+          console.log(`Added employee: ${first_name} ${last_name}`);
+          startApp();
+        });
+      };
 
 
 function startApp() {
