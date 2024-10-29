@@ -55,6 +55,20 @@ const queries = {
         );
     },
     
+    updateEmployeeRole: async (employeeId, roleId) => {
+        await pool.query(
+            `UPDATE employee SET role_id = $1 WHERE id = $2`,
+            [roleId, employeeId]
+        );
+    },
+
+    updateEmployeeDepartment: async (employeeId, departmentId) => {
+        await pool.query(
+            `UPDATE employee SET department_id = $1 WHERE id = $2`,
+            [departmentId, employeeId]
+        );
+    },
+
     deleteDepartment: async (id) => {
         const res = await pool.query(
             `DELETE FROM department WHERE id = $1 RETURNING *`,

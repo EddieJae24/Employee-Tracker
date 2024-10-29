@@ -14,6 +14,12 @@ const mainMenu = async () => {
               'Update employee manager',
               'View employees by manager',
               'Delete employee',
+              'View all roles',
+              'Add a role',
+              'Update employee role',
+              'View all departments',
+              'Add a department',
+              'Update employee department',
               'Exit'
           ]
       }
@@ -34,11 +40,38 @@ const mainMenu = async () => {
           break;
 
       case 'View employees by manager':
-          await viewEmployeesByManagerPrompt();
-          break;
-
+            employeesByManager = await viewEmployeesByManagerPrompt();
+            console.table(employeesByManager);
+            break;
+      
       case 'Delete employee':
           await deleteEmployeePrompt();
+          break;
+
+      case 'View all roles':
+          const roles = await viewRolesPrompt();
+          console.table(roles);
+          break;
+
+      case 'Add a role':
+          await addRolePrompt();
+          break;
+
+      case 'Update employee role':
+          await updateEmployeeRolePrompt();
+          break;
+
+      case 'View all departments':
+          const departments = await viewDepartmentsPrompt();
+          console.table(departments);
+          break;
+
+      case 'Add a department':
+          await addDepartmentPrompt();
+          break;
+
+      case 'Update employee department':
+          await updateEmployeeDepartmentPrompt();
           break;
 
       case 'Exit':
@@ -50,12 +83,44 @@ const mainMenu = async () => {
 };
 
 // Additional prompts for collecting inputs
-//  
+
+// view all employees prompt
 const viewAllEmployeesPrompt = async () => {
   const employees = await queries.viewEmployees();
   return employees;
 };
+// add department prompt
+const viewRolesPrompt = async () => {
+  const roles = await queries.viewRoles();
+  return roles;
+};
 
+const viewEmployeesByManagerPrompt = async () => {
+  const employees = await queries.viewEmployees();
+  const managerChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
+
+  const { managerId } = await inquirer.prompt([
+      {
+          type: 'list',
+          name: 'managerId',
+          message: 'Select a manager to view their employees:',
+          choices: managerChoices
+      }
+  ]);
+
+  const employeesByManager = await queries.viewEmployeesByManager(managerId);
+  if (employeesByManager.length) {
+      console.table(employeesByManager);
+  } else {
+      console.log('No employees found for this manager.');
+  }
+};
+
+const viewDepartmentsPrompt = async () => {
+  const departments = await queries.viewDepartments();
+  return departments;
+};
+// add employee prompt
 const addEmployeePrompt = async () => {
   const { firstName, lastName, roleId, managerId } = await inquirer.prompt([
       { type: 'input', name: 'firstName', message: 'First name:' },
@@ -68,6 +133,20 @@ const addEmployeePrompt = async () => {
   console.log('Employee added:', newEmployee);
 };
 
+// add role prompt
+const addRolePrompt = async () => {
+  const departments = await queries.viewDepartments();
+  const departmentChoices = departments.map(dep => ({ name: dep.name, value: dep.id }));
+
+  const { title, salary, departmentId } = await inquirer.prompt([
+      { type: 'input', name: 'title', message: 'Title:' },
+      { type: 'input', name: 'salary', message: 'Salary:' },
+      { type: 'list', name: 'departmentId', message: 'Department:', choices: departmentChoices }
+  ]);
+
+  const newRole = await queries.addRole(title, salary, departmentId);
+  console.log('Role added:', newRole);
+};
 
 // Update employee manager
 const updateEmployeeManagerPrompt = async () => {
@@ -94,28 +173,62 @@ const updateEmployeeManagerPrompt = async () => {
   console.log('Employee manager updated successfully.');
 };
 
-// View employees by manager
-const viewEmployeesByManagerPrompt = async () => {
+const updateEmployeeRolePrompt = async () => {
   const employees = await queries.viewEmployees();
-  const managerChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
+  const employeeChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
 
-  const { managerId } = await inquirer.prompt([
+  const roles = await queries.viewRoles();
+  const roleChoices = roles.map(role => ({ name: role.title, value: role.id }));
+
+  const { employeeId, roleId } = await inquirer.prompt([
       {
           type: 'list',
-          name: 'managerId',
-          message: 'Select a manager to view their employees:',
-          choices: managerChoices
+          name: 'employeeId',
+          message: 'Select the employee to update their role:',
+          choices: employeeChoices
+      },
+      {
+          type: 'list',
+          name: 'roleId',
+          message: 'Select the new role for this employee:',
+          choices: roleChoices
       }
   ]);
 
-  const employeesByManager = await queries.viewEmployeesByManager(managerId);
-  if (employeesByManager.length) {
-      console.table(employeesByManager);
-  } else {
-      console.log('No employees found for this manager.');
-  }
+  await queries.updateEmployeeRole(employeeId, roleId);
+  console.log('Employee role updated successfully.');
 };
 
+const updateEmployeeDepartmentPrompt = async () => {
+  const employees = await queries.viewEmployees();
+  const employeeChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
+
+  const departments = await queries.viewDepartments();
+  const departmentChoices = departments.map(dep => ({ name: dep.name, value: dep.id }));
+
+  const { employeeId, departmentId } = await inquirer.prompt([
+      {
+          type: 'list',
+          name: 'employeeId',
+          message: 'Select the employee to update their department:',
+          choices: employeeChoices
+      },
+      {
+          type: 'list',
+          name: 'departmentId',
+          message: 'Select the new department for this employee:',
+          choices: departmentChoices
+      }
+  ]);
+
+  await queries.updateEmployeeDepartment(employeeId, departmentId);
+  console.log('Employee department updated successfully.');
+};
+
+// View employees by manager
+
+
+// delete employee prompt
 const deleteEmployeePrompt = async () => {
   const employees = await queries.getAllEmployees();
   const employeeChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
