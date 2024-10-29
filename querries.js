@@ -1,4 +1,5 @@
 // queries.js
+
 import pool from './db';
 
 const queries = {
@@ -14,6 +15,11 @@ const queries = {
 
     viewEmployees: async () => {
         const res = await pool.query(`SELECT * FROM employee`);
+        return res.rows;
+    },
+
+    viewEmployeesByManager: async (managerId) => {
+        const res = await pool.query(`SELECT * FROM employee WHERE manager_id = $1`, [managerId]);
         return res.rows;
     },
 
@@ -33,7 +39,7 @@ const queries = {
         );
         return res.rows[0];
     },
-    
+
     addEmployee: async (firstName, lastName, roleId, managerId) => {
         const res = await pool.query(
             `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4) RETURNING *`,
@@ -41,9 +47,29 @@ const queries = {
         );
         return res.rows[0];
     },
-    
 
-    // Define other query functions like updateEmployeeManager, viewEmployeesByManager, deleteEmployee, etc.
+    updateEmployeeManager: async (employeeId, managerId) => {
+        await pool.query(
+            `UPDATE employee SET manager_id = $1 WHERE id = $2`,
+            [managerId, employeeId]
+        );
+    },
+    
+    deleteDepartment: async (id) => {
+        const res = await pool.query(
+            `DELETE FROM department WHERE id = $1 RETURNING *`,
+            [id]
+        );
+        return res.rows[0];
+    },
+
+    deleteEmployee: async (id) => {
+        const res = await pool.query(
+            `DELETE FROM employee WHERE id = $1 RETURNING *`,
+            [id]
+        );
+        return res.rows[0];
+    },
 };
 
 export default queries;
