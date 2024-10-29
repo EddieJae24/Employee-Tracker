@@ -96,7 +96,7 @@ const updateEmployeeManagerPrompt = async () => {
 
 // View employees by manager
 const viewEmployeesByManagerPrompt = async () => {
-  const employees = await queries.getAllEmployees();
+  const employees = await queries.viewEmployees();
   const managerChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
 
   const { managerId } = await inquirer.prompt([
@@ -108,7 +108,7 @@ const viewEmployeesByManagerPrompt = async () => {
       }
   ]);
 
-  const employeesByManager = await queries.getEmployeesByManager(managerId);
+  const employeesByManager = await queries.viewEmployeesByManager(managerId);
   if (employeesByManager.length) {
       console.table(employeesByManager);
   } else {
