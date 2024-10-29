@@ -1,6 +1,15 @@
 import inquirer from 'inquirer';
 import pool from './db';
 import queries from './queries';
+import setupDatabase from './setupdb';
+
+const initializeApp = async () => {
+  await setupDatabase(); // Initialize the schema and seed data
+  console.log('Database initialized.');
+  mainMenu();  // Start the main application menu
+};
+
+initializeApp();
 
 const mainMenu = async () => {
   const { action } = await inquirer.prompt([
@@ -81,6 +90,7 @@ const mainMenu = async () => {
   }
   mainMenu(); // Re-run the menu after action completes
 };
+// this is the main function that will run the application
 
 // Additional prompts for collecting inputs
 
@@ -146,6 +156,16 @@ const addRolePrompt = async () => {
 
   const newRole = await queries.addRole(title, salary, departmentId);
   console.log('Role added:', newRole);
+};
+
+// add department prompt
+const addDepartmentPrompt = async () => {
+  const { name } = await inquirer.prompt([
+      { type: 'input', name: 'name', message: 'Department name:' }
+  ]);
+
+  const newDepartment = await queries.addDepartment(name);
+  console.log('Department added:', newDepartment);
 };
 
 // Update employee manager
@@ -224,6 +244,8 @@ const updateEmployeeDepartmentPrompt = async () => {
   await queries.updateEmployeeDepartment(employeeId, departmentId);
   console.log('Employee department updated successfully.');
 };
+
+
 
 // View employees by manager
 
