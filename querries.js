@@ -1,6 +1,6 @@
 // queries.js
 
-import pool from './db';
+import pool from './db.js';
 
 const queries = {
     viewDepartments: async () => {
@@ -23,10 +23,10 @@ const queries = {
         return res.rows;
     },
 
-    addDepartment: async (name) => {
+    addDepartment: async (names) => {
         const res = await pool.query(
-            `INSERT INTO department (name) VALUES ($1) RETURNING *`,
-            [name]
+            `INSERT INTO department (names) VALUES ($1) RETURNING *`,
+            [names]
         );
         return res.rows[0];
     },
@@ -41,6 +41,11 @@ const queries = {
     },
 
     addEmployee: async (firstName, lastName, roleId, managerId) => {
+        const { rows } = await pool.query('SELECT * FROM role WHERE id = $1', [roleId]);
+    if (rows.length === 0) {
+        console.log(`Error: Role ID ${roleId} does not exist. Please enter a valid Role ID.`);
+        return;
+    }
         const res = await pool.query(
             `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4) RETURNING *`,
             [firstName, lastName, roleId, managerId]

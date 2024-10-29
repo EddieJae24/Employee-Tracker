@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
-import pool from './db';
-import queries from './queries';
-import setupDatabase from './setupdb';
+import pool from './db.js';
+import queries from './querries.js';
+import setupDatabase from './setupdb.js';
 
 const initializeApp = async () => {
   await setupDatabase(); // Initialize the schema and seed data
@@ -49,8 +49,12 @@ const mainMenu = async () => {
           break;
 
       case 'View employees by manager':
-            employeesByManager = await viewEmployeesByManagerPrompt();
-            console.table(employeesByManager);
+            const empByManager = await viewEmployeesByManagerPrompt();
+              try {
+                  console.table(empByManager);
+              } catch (error) {
+                  console.error('An error occurred while displaying employees by manager:', error);
+              }
             break;
       
       case 'Delete employee':
@@ -106,25 +110,35 @@ const viewRolesPrompt = async () => {
 };
 
 const viewEmployeesByManagerPrompt = async () => {
-  const employees = await queries.viewEmployees();
-  const managerChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
+  try {
+      const employees = await queries.viewEmployees();
+      const managerChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
 
-  const { managerId } = await inquirer.prompt([
-      {
-          type: 'list',
-          name: 'managerId',
-          message: 'Select a manager to view their employees:',
-          choices: managerChoices
-      }
-  ]);
+      const { managerId } = await inquirer.prompt([
+          {
+              type: 'list',
+              name: 'managerId',
+              message: 'Select a manager to view their employees:',
+              choices: managerChoices
+          }
+      ]);
 
-  const employeesByManager = await queries.viewEmployeesByManager(managerId);
-  if (employeesByManager.length) {
-      console.table(employeesByManager);
-  } else {
-      console.log('No employees found for this manager.');
+      const employeesByManager = await queries.viewEmployeesByManager(managerId);
+      return employeesByManager;
   }
-};
+  catch (error) { 
+    console.error('No employees found for this manager', error); 
+  }
+
+
+  // const employeesByManager = await queries.viewEmployeesByManager(managerId);
+  // if (employeesByManager.length) {
+  //     console.table(employeesByManager);
+  // } else {
+  //     console.log('No employees found for this manager.');
+
+  }
+
 
 const viewDepartmentsPrompt = async () => {
   const departments = await queries.viewDepartments();
@@ -160,18 +174,18 @@ const addRolePrompt = async () => {
 
 // add department prompt
 const addDepartmentPrompt = async () => {
-  const { name } = await inquirer.prompt([
+  const { names } = await inquirer.prompt([
       { type: 'input', name: 'name', message: 'Department name:' }
   ]);
 
-  const newDepartment = await queries.addDepartment(name);
+  const newDepartment = await queries.addDepartment(names);
   console.log('Department added:', newDepartment);
 };
 
 // Update employee manager
 const updateEmployeeManagerPrompt = async () => {
   // Fetch all employees to select the employee and manager
-  const employees = await queries.getAllEmployees();
+  const employees = await queries.viewEmployees();
   const employeeChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
 
   const { employeeId, managerId } = await inquirer.prompt([
@@ -252,7 +266,7 @@ const updateEmployeeDepartmentPrompt = async () => {
 
 // delete employee prompt
 const deleteEmployeePrompt = async () => {
-  const employees = await queries.getAllEmployees();
+  const employees = await queries.viewEmployees();
   const employeeChoices = employees.map(emp => ({ name: `${emp.first_name} ${emp.last_name}`, value: emp.id }));
 
   const { employeeId } = await inquirer.prompt([
@@ -269,4 +283,4 @@ const deleteEmployeePrompt = async () => {
 };
 
 
-mainMenu();
+// mainMenu();

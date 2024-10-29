@@ -1,7 +1,7 @@
 // setup.js
 // this file will be used to set up the database schema and seed the database with some initial data.
 
-import pool from './db';
+import pool from './db.js';
 import fs from 'fs';
 // const fs = require('fs');
 // const pool = require('./db');
@@ -24,8 +24,8 @@ const setupDatabase = async () => {
         console.log('Setup complete.');
     } catch (error) {
         console.error('Error setting up the database:', error);
-    } finally {
-        pool.end();
+    // } finally {
+    //     pool.end();
     }
 };
 
