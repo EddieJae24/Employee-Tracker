@@ -1,4 +1,6 @@
 // setup.js
+// this file will be used to set up the database schema and seed the database with some initial data.
+
 import pool from './db';
 import fs from 'fs';
 // const fs = require('fs');
@@ -30,4 +32,4 @@ const setupDatabase = async () => {
 // Export the setupDatabase function to allow it to be imported in index.js
 // export default setupDatabase;
 
-export default setupDatabase();
+export default setupDatabase;
