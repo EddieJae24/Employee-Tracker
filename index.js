@@ -277,13 +277,16 @@ const updateEmployeeDepartmentPrompt = async () => {
   const departments = await queries.viewDepartments();
   const departmentChoices = departments.map(dep => ({ name: dep.name, value: dep.id }));
 
-  const { employeeId, departmentId } = await inquirer.prompt([
+  const { employeeId } = await inquirer.prompt([
       {
           type: 'list',
           name: 'employeeId',
           message: 'Select the employee to update their department:',
           choices: employeeChoices
-      },
+      }
+  ]);
+
+  const { departmentId } = await inquirer.prompt([
       {
           type: 'list',
           name: 'departmentId',
@@ -294,6 +297,7 @@ const updateEmployeeDepartmentPrompt = async () => {
 
   await queries.updateEmployeeDepartment(employeeId, departmentId);
   console.log('Employee department updated successfully.');
+  
 };
 
 

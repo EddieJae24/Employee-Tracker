@@ -71,7 +71,7 @@ const queries = {
 
     updateEmployeeDepartment: async (employeeId, departmentId) => {
         await pool.query(
-            `UPDATE role SET department_id = $1 WHERE id = $2`,
+            `UPDATE employee SET department_id = $1 WHERE id = $2`,
             [departmentId, employeeId]
         );
     },
