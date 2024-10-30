@@ -22,6 +22,7 @@ const mainMenu = async () => {
               'Add employee',
               'Update employee manager',
               'View employees by manager',
+              'View employees by department',
               'Delete employee',
               'View all roles',
               'Add a role',
@@ -55,6 +56,16 @@ const mainMenu = async () => {
               } catch (error) {
                   console.error('An error occurred while displaying employees by manager:', error);
               }
+            break;
+      
+      case 'View employees by department':
+            const empByDepartment = await viewEmployeesByDepartmentPrompt();
+            try {
+                console.table(empByDepartment);
+            }
+            catch (error) {
+                console.error('An error occurred while displaying employees by department:', error);
+            }
             break;
       
       case 'Delete employee':
@@ -139,6 +150,31 @@ const viewEmployeesByManagerPrompt = async () => {
 
   }
 
+// view all employee by department
+const viewEmployeesByDepartmentPrompt = async () => {
+    
+    const departments = await queries.viewDepartments();
+    const departmentChoices = departments.map(dep => ({ name: dep.name, value: dep.id }));
+    
+    const { departmentId } = await inquirer.prompt([
+        {
+            type: 'list',
+            name: 'departmentId',
+            message: 'Select a department to view employees:',
+            choices: departmentChoices
+        }
+    ]);
+    const employeesByDepartment = await queries.viewEmployeesByDepartment(departmentId);
+    if (employeesByDepartment === null) {
+        console.log('No employees found for this department.');
+    } else {
+        console.table(employeesByDepartment);
+} 
+
+  
+    
+};
+
 
 const viewDepartmentsPrompt = async () => {
   const departments = await queries.viewDepartments();
@@ -146,14 +182,15 @@ const viewDepartmentsPrompt = async () => {
 };
 // add employee prompt
 const addEmployeePrompt = async () => {
-  const { firstName, lastName, roleId, managerId } = await inquirer.prompt([
+  const { firstName, lastName, roleId, managerId, departmentId } = await inquirer.prompt([
       { type: 'input', name: 'firstName', message: 'First name:' },
       { type: 'input', name: 'lastName', message: 'Last name:' },
       { type: 'input', name: 'roleId', message: 'Role ID:' },
-      { type: 'input', name: 'managerId', message: 'Manager ID (optional):' }
+      { type: 'input', name: 'managerId', message: 'Manager ID (optional):' },
+      { type: 'input', name: 'departmentId', message: 'Department ID:' }
   ]);
 
-  const newEmployee = await queries.addEmployee(firstName, lastName, roleId, managerId || null);
+  const newEmployee = await queries.addEmployee(firstName, lastName, roleId, managerId, departmentId || null);
   console.log('Employee added:', newEmployee);
 };
 
@@ -174,11 +211,11 @@ const addRolePrompt = async () => {
 
 // add department prompt
 const addDepartmentPrompt = async () => {
-  const { names } = await inquirer.prompt([
+  const { name } = await inquirer.prompt([
       { type: 'input', name: 'name', message: 'Department name:' }
   ]);
 
-  const newDepartment = await queries.addDepartment(names);
+  const newDepartment = await queries.addDepartment(name);
   console.log('Department added:', newDepartment);
 };
 

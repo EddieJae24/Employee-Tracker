@@ -23,10 +23,16 @@ const queries = {
         return res.rows;
     },
 
-    addDepartment: async (names) => {
+    viewEmployeesByDepartment: async (departmentId) => {
+        const res = await pool.query(`SELECT * FROM employee WHERE department_id = $1`, [departmentId]);
+        return res.rows;
+    },
+    
+
+    addDepartment: async (name) => {
         const res = await pool.query(
-            `INSERT INTO department (names) VALUES ($1) RETURNING *`,
-            [names]
+            `INSERT INTO department (name) VALUES ($1) RETURNING *`,
+            [name]
         );
         return res.rows[0];
     },
@@ -40,15 +46,11 @@ const queries = {
         return res.rows[0];
     },
 
-    addEmployee: async (firstName, lastName, roleId, managerId) => {
-        const { rows } = await pool.query('SELECT * FROM role WHERE id = $1', [roleId]);
-    if (rows.length === 0) {
-        console.log(`Error: Role ID ${roleId} does not exist. Please enter a valid Role ID.`);
-        return;
-    }
+    addEmployee: async (firstName, lastName, roleId, managerId, departmentId) => {
+       
         const res = await pool.query(
-            `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4) RETURNING *`,
-            [firstName, lastName, roleId, managerId]
+            `INSERT INTO employee (first_name, last_name, role_id, manager_id, department_id) VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+            [firstName, lastName, roleId, managerId, departmentId]
         );
         return res.rows[0];
     },
@@ -69,7 +71,7 @@ const queries = {
 
     updateEmployeeDepartment: async (employeeId, departmentId) => {
         await pool.query(
-            `UPDATE employee SET department_id = $1 WHERE id = $2`,
+            `UPDATE role SET department_id = $1 WHERE id = $2`,
             [departmentId, employeeId]
         );
     },
